@@ -15,7 +15,6 @@ void print_end_screen(char* o_display, const int i_dim, const int i_score);
 
 void write_snake(const Snake* i_snake,
                  char* o_display,
-                 const int i_dim,
                  const char c);
 
 #endif // SNAKE_INCLUDED_DISPLAY

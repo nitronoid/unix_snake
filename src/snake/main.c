@@ -3,12 +3,12 @@
 #include <time.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <assert.h>
 
 #include "snake/snake_state.h"
 #include "snake/input.h"
 #include "snake/display.h"
 #include "snake/collision.h"
-
 
 int generate_food_position(const Snake* i_snake, const int i_dim)
 {
@@ -24,17 +24,21 @@ int generate_food_position(const Snake* i_snake, const int i_dim)
   return food_pos;
 }
 
-void write_food(const int i_food,
-                char* o_display,
-                const int i_dim,
-                const char c)
+void write_food(const int i_food, char* o_display, const char c)
 {
   o_display[i_food] = c;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
-  const int dim = 20;
+  assert(argc == 3 && "Must provide a dimension and a speed!");
+  // Get the dimensions of the game
+  char* end;
+  const int dim = strtol(argv[1], &end, 10);
+  assert(dim > 5 && "Game dimensions invalid!");
+  const int speed = strtol(argv[2], &end, 10);
+  assert(speed > 0 && "Invalid speed");
+
   const int npixels = dim * dim;
   // Allocate a char for every pixel, plus an extra one for the null terminator
   char display_buffer[npixels + 1];
@@ -55,20 +59,20 @@ int main()
   pthread_t input_thread = create_input_thread(&snake);
 
   // Two structures for the game update delay
-  struct timespec sleep_duration = {0, 300000000};
+  struct timespec sleep_duration = {0, 1000000000 / speed};
   struct timespec remaining_duration;
 
   // Generate an initial food location
   int food = generate_food_position(&snake, dim);
   // Write the initial food location into the display buffer
-  write_food(food, display_buffer, dim, 'x');
+  write_food(food, display_buffer, 'x');
 
   int score = 0;
   // Main game loop
   while (!snake.quit)
   {
     // Clear the snake from the display
-    write_snake(&snake, display_buffer, dim, ' ');
+    write_snake(&snake, display_buffer, ' ');
     // Move the snake one tick
     move_snake(&snake, dim);
     // Check for the snake eating
@@ -79,18 +83,18 @@ int main()
       // Grow the snake
       grow_snake(&snake, dim);
       // Clear the current food location by writing a blank
-      write_food(food, display_buffer, dim, ' ');
+      write_food(food, display_buffer, ' ');
       // Generate a new position for the food
       food = generate_food_position(&snake, dim);
       // Write the new food location into the display buffer
-      write_food(food, display_buffer, dim, 'x');
+      write_food(food, display_buffer, 'x');
     }
     // Check whether the snake has hit itself
     snake.quit |= check_self_collisions(&snake);
     // Check whether the snake has hit a wall
     snake.quit |= check_boundary_collisions(&snake, dim);
     // Write the snake to the display
-    write_snake(&snake, display_buffer, dim, 'o');
+    write_snake(&snake, display_buffer, 'o');
     // Print out the display string
     print_display(display_buffer, dim);
     // Move the start of stdout back to the beginning to overwrite the display
