@@ -8,7 +8,7 @@ SRC_FILES = $(wildcard $(SRC_DIR)/*.c)
 OBJ_FILES = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o,$(SRC_FILES))
 INCLUDES := -Iinclude
 
-CFLAGS := -g -pthread -O3 
+CFLAGS := -g -pthread -O3 -Wall -Wextra
 LDFLAGS := -g -pthread
 
 .PHONY: directories
