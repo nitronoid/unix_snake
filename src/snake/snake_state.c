@@ -1,4 +1,5 @@
 #include "snake/snake_state.h"
+#include "stdlib.h"
 
 Snake make_snake(const int i_dim)
 {

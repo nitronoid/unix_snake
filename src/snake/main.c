@@ -10,11 +10,18 @@
 #include "snake/collision.h"
 
 
-int generate_food_position(const int i_dim)
+int generate_food_position(const Snake* i_snake, const int i_dim)
 {
-  const int x = (rand() % (i_dim - 2)) + 1;
-  const int y = (rand() % (i_dim - 2)) + 1;
-  return x + y * i_dim;
+  // Initialize the food position to the head of the snake
+  int food_pos = i_snake->positions[i_snake->length - 1];
+  // Regenerate the food position while it is inside the snake
+  while (check_snake_collisions(i_snake, food_pos) != -1)
+  {
+    const int x = (rand() % (i_dim - 2)) + 1;
+    const int y = (rand() % (i_dim - 2)) + 1;
+    food_pos = x + y * i_dim;
+  }
+  return food_pos;
 }
 
 void write_food(const int i_food,
@@ -52,7 +59,7 @@ int main()
   struct timespec remaining_duration;
 
   // Generate an initial food location
-  int food = generate_food_position(dim);
+  int food = generate_food_position(&snake, dim);
   // Write the initial food location into the display buffer
   write_food(food, display_buffer, dim, 'x');
 
@@ -74,7 +81,7 @@ int main()
       // Clear the current food location by writing a blank
       write_food(food, display_buffer, dim, ' ');
       // Generate a new position for the food
-      food = generate_food_position(dim);
+      food = generate_food_position(&snake, dim);
       // Write the new food location into the display buffer
       write_food(food, display_buffer, dim, 'x');
     }
